@@ -1,0 +1,161 @@
+{"timestamp": null, "level": null, "name": "root", "message": "Logging setup complete. Log level: INFO"}
+{"timestamp": null, "level": null, "name": "app.main", "message": "Initializing services..."}
+{"timestamp": null, "level": null, "name": "app.main", "message": "All services initialized successfully"}
+{"timestamp": null, "level": null, "name": "kiteconnect.ticker", "message": "Connection error: 1006 - connection was closed uncleanly (WebSocket connection upgrade failed (403 - Forbidden))"}
+{"timestamp": null, "level": null, "name": "app.services.websocket_manager", "message": "WebSocket error: 1006 - connection was closed uncleanly (WebSocket connection upgrade failed (403 - Forbidden))"}
+{"timestamp": null, "level": null, "name": "kiteconnect.ticker", "message": "Connection closed: 1006 - connection was closed uncleanly (WebSocket connection upgrade failed (403 - Forbidden))"}
+{"timestamp": null, "level": null, "name": "app.services.websocket_manager", "message": "WebSocket closed: 1006 - connection was closed uncleanly (WebSocket connection upgrade failed (403 - Forbidden))"}
+{"timestamp": null, "level": null, "name": "kiteconnect.ticker", "message": "Connection error: 1006 - connection was closed uncleanly (WebSocket connection upgrade failed (403 - Forbidden))"}
+{"timestamp": null, "level": null, "name": "app.services.websocket_manager", "message": "WebSocket error: 1006 - connection was closed uncleanly (WebSocket connection upgrade failed (403 - Forbidden))"}
+{"timestamp": null, "level": null, "name": "kiteconnect.ticker", "message": "Connection closed: 1006 - connection was closed uncleanly (WebSocket connection upgrade failed (403 - Forbidden))"}
+{"timestamp": null, "level": null, "name": "app.services.websocket_manager", "message": "WebSocket closed: 1006 - connection was closed uncleanly (WebSocket connection upgrade failed (403 - Forbidden))"}
+{"timestamp": null, "level": null, "name": "app.main", "message": "Shutting down services..."}
+{"timestamp": null, "level": null, "name": "app.services.trading_strategy", "message": "Strategy stopped"}
+{"timestamp": null, "level": null, "name": "app.main", "message": "Shutdown complete"}
+{"timestamp": null, "level": null, "name": "root", "message": "Logging setup complete. Log level: INFO"}
+{"timestamp": null, "level": null, "name": "app.main", "message": "Initializing services..."}
+{"timestamp": null, "level": null, "name": "app.main", "message": "All services initialized successfully"}
+{"timestamp": null, "level": null, "name": "kiteconnect.ticker", "message": "Connection error: 1006 - connection was closed uncleanly (WebSocket connection upgrade failed (403 - Forbidden))"}
+{"timestamp": null, "level": null, "name": "app.services.websocket_manager", "message": "WebSocket error: 1006 - connection was closed uncleanly (WebSocket connection upgrade failed (403 - Forbidden))"}
+{"timestamp": null, "level": null, "name": "kiteconnect.ticker", "message": "Connection closed: 1006 - connection was closed uncleanly (WebSocket connection upgrade failed (403 - Forbidden))"}
+{"timestamp": null, "level": null, "name": "app.services.websocket_manager", "message": "WebSocket closed: 1006 - connection was closed uncleanly (WebSocket connection upgrade failed (403 - Forbidden))"}
+{"timestamp": null, "level": null, "name": "kiteconnect.ticker", "message": "Connection error: 1006 - connection was closed uncleanly (WebSocket connection upgrade failed (403 - Forbidden))"}
+{"timestamp": null, "level": null, "name": "app.services.websocket_manager", "message": "WebSocket error: 1006 - connection was closed uncleanly (WebSocket connection upgrade failed (403 - Forbidden))"}
+{"timestamp": null, "level": null, "name": "kiteconnect.ticker", "message": "Connection closed: 1006 - connection was closed uncleanly (WebSocket connection upgrade failed (403 - Forbidden))"}
+{"timestamp": null, "level": null, "name": "app.services.websocket_manager", "message": "WebSocket closed: 1006 - connection was closed uncleanly (WebSocket connection upgrade failed (403 - Forbidden))"}
+{"timestamp": null, "level": null, "name": "kiteconnect.ticker", "message": "Connection error: 1006 - connection was closed uncleanly (WebSocket connection upgrade failed (403 - Forbidden))"}
+{"timestamp": null, "level": null, "name": "app.services.websocket_manager", "message": "WebSocket error: 1006 - connection was closed uncleanly (WebSocket connection upgrade failed (403 - Forbidden))"}
+{"timestamp": null, "level": null, "name": "kiteconnect.ticker", "message": "Connection closed: 1006 - connection was closed uncleanly (WebSocket connection upgrade failed (403 - Forbidden))"}
+{"timestamp": null, "level": null, "name": "app.services.websocket_manager", "message": "WebSocket closed: 1006 - connection was closed uncleanly (WebSocket connection upgrade failed (403 - Forbidden))"}
+{"timestamp": null, "level": null, "name": "kiteconnect.ticker", "message": "Connection error: 1006 - connection was closed uncleanly (WebSocket connection upgrade failed (403 - Forbidden))"}
+{"timestamp": null, "level": null, "name": "app.services.websocket_manager", "message": "WebSocket error: 1006 - connection was closed uncleanly (WebSocket connection upgrade failed (403 - Forbidden))"}
+{"timestamp": null, "level": null, "name": "kiteconnect.ticker", "message": "Connection closed: 1006 - connection was closed uncleanly (WebSocket connection upgrade failed (403 - Forbidden))"}
+{"timestamp": null, "level": null, "name": "app.services.websocket_manager", "message": "WebSocket closed: 1006 - connection was closed uncleanly (WebSocket connection upgrade failed (403 - Forbidden))"}
+{"timestamp": null, "level": null, "name": "kiteconnect.ticker", "message": "Connection error: 1006 - connection was closed uncleanly (WebSocket connection upgrade failed (403 - Forbidden))"}
+{"timestamp": null, "level": null, "name": "app.services.websocket_manager", "message": "WebSocket error: 1006 - connection was closed uncleanly (WebSocket connection upgrade failed (403 - Forbidden))"}
+{"timestamp": null, "level": null, "name": "kiteconnect.ticker", "message": "Connection closed: 1006 - connection was closed uncleanly (WebSocket connection upgrade failed (403 - Forbidden))"}
+{"timestamp": null, "level": null, "name": "app.services.websocket_manager", "message": "WebSocket closed: 1006 - connection was closed uncleanly (WebSocket connection upgrade failed (403 - Forbidden))"}
+{"timestamp": null, "level": null, "name": "app.main", "message": "Shutting down services..."}
+{"timestamp": null, "level": null, "name": "app.services.trading_strategy", "message": "Strategy stopped"}
+{"timestamp": null, "level": null, "name": "app.main", "message": "Shutdown complete"}
+{"timestamp": null, "level": null, "name": "root", "message": "Logging setup complete. Log level: INFO"}
+{"timestamp": null, "level": null, "name": "app.main", "message": "Initializing services..."}
+{"timestamp": null, "level": null, "name": "app.main", "message": "Failed to initialize Kite client: Incorrect `api_key` or `access_token`."}
+{"timestamp": null, "level": null, "name": "app.main", "message": "Starting in offline mode. WebSocket features will be disabled."}
+{"timestamp": null, "level": null, "name": "app.main", "message": "Skipping WebSocket connection (SKIP_WEBSOCKET=true)"}
+{"timestamp": null, "level": null, "name": "app.main", "message": "All services initialized successfully"}
+{"timestamp": null, "level": null, "name": "app.main", "message": "Shutting down services..."}
+{"timestamp": null, "level": null, "name": "app.services.trading_strategy", "message": "Strategy stopped"}
+{"timestamp": null, "level": null, "name": "app.main", "message": "Shutdown complete"}
+{"timestamp": null, "level": null, "name": "root", "message": "Logging setup complete. Log level: INFO"}
+{"timestamp": null, "level": null, "name": "app.main", "message": "Initializing services..."}
+{"timestamp": null, "level": null, "name": "app.main", "message": "Failed to initialize Kite client: Incorrect `api_key` or `access_token`."}
+{"timestamp": null, "level": null, "name": "app.main", "message": "Starting in offline mode. WebSocket features will be disabled."}
+{"timestamp": null, "level": null, "name": "app.main", "message": "Skipping WebSocket connection (SKIP_WEBSOCKET=true)"}
+{"timestamp": null, "level": null, "name": "app.main", "message": "All services initialized successfully"}
+{"timestamp": null, "level": null, "name": "app.main", "message": "Shutting down services..."}
+{"timestamp": null, "level": null, "name": "app.services.trading_strategy", "message": "Strategy stopped"}
+{"timestamp": null, "level": null, "name": "app.main", "message": "Shutdown complete"}
+{"timestamp": null, "level": null, "name": "root", "message": "Logging setup complete. Log level: INFO"}
+{"timestamp": null, "level": null, "name": "app.main", "message": "Initializing services..."}
+{"timestamp": null, "level": null, "name": "app.main", "message": "Failed to initialize Kite client: Incorrect `api_key` or `access_token`."}
+{"timestamp": null, "level": null, "name": "app.main", "message": "Starting in offline mode. WebSocket features will be disabled."}
+{"timestamp": null, "level": null, "name": "app.main", "message": "Skipping WebSocket connection (SKIP_WEBSOCKET=true)"}
+{"timestamp": null, "level": null, "name": "app.main", "message": "All services initialized successfully"}
+{"timestamp": null, "level": null, "name": "app.main", "message": "Shutting down services..."}
+{"timestamp": null, "level": null, "name": "app.services.trading_strategy", "message": "Strategy stopped"}
+{"timestamp": null, "level": null, "name": "app.main", "message": "Shutdown complete"}
+{"timestamp": null, "level": null, "name": "root", "message": "Logging setup complete. Log level: INFO"}
+{"timestamp": null, "level": null, "name": "app.main", "message": "Initializing services..."}
+{"timestamp": null, "level": null, "name": "app.main", "message": "Kite connected successfully. User: Rahul Dilip Mashere"}
+{"timestamp": null, "level": null, "name": "app.main", "message": "WebSocket connected successfully"}
+{"timestamp": null, "level": null, "name": "app.main", "message": "All services initialized successfully"}
+{"timestamp": null, "level": null, "name": "app.services.websocket_manager", "message": "WebSocket connected successfully"}
+{"timestamp": null, "level": null, "name": "root", "message": "Logging setup complete. Log level: INFO"}
+{"timestamp": null, "level": null, "name": "app.main", "message": "Initializing services..."}
+{"timestamp": null, "level": null, "name": "app.main", "message": "Kite connected successfully. User: Rahul Dilip Mashere"}
+{"timestamp": null, "level": null, "name": "app.main", "message": "WebSocket connected successfully"}
+{"timestamp": null, "level": null, "name": "app.main", "message": "All services initialized successfully"}
+{"timestamp": null, "level": null, "name": "app.services.websocket_manager", "message": "WebSocket connected successfully"}
+{"timestamp": null, "level": null, "name": "app.services.instrument_lookup", "message": "Refreshing instruments for NFO"}
+{"timestamp": null, "level": null, "name": "app.services.instrument_lookup", "message": "Cached 30227 instruments for NFO"}
+{"timestamp": null, "level": null, "name": "root", "message": "Logging setup complete. Log level: INFO"}
+{"timestamp": null, "level": null, "name": "app.main", "message": "Initializing services..."}
+{"timestamp": null, "level": null, "name": "app.main", "message": "Kite connected successfully. User: Rahul Dilip Mashere"}
+{"timestamp": null, "level": null, "name": "app.main", "message": "WebSocket connected successfully"}
+{"timestamp": null, "level": null, "name": "app.main", "message": "All services initialized successfully"}
+{"timestamp": null, "level": null, "name": "app.services.websocket_manager", "message": "WebSocket connected successfully"}
+{"timestamp": null, "level": null, "name": "app.services.instrument_lookup", "message": "Refreshing instruments for NFO"}
+{"timestamp": null, "level": null, "name": "app.services.instrument_lookup", "message": "Cached 30227 instruments for NFO"}
+{"timestamp": null, "level": null, "name": "app.main", "message": "Shutting down services..."}
+{"timestamp": null, "level": null, "name": "app.services.trading_strategy", "message": "Strategy stopped"}
+{"timestamp": null, "level": null, "name": "app.main", "message": "Shutdown complete"}
+{"timestamp": null, "level": null, "name": "root", "message": "Logging setup complete. Log level: INFO"}
+{"timestamp": null, "level": null, "name": "app.main", "message": "Initializing services..."}
+{"timestamp": null, "level": null, "name": "app.main", "message": "Kite connected successfully. User: Rahul Dilip Mashere"}
+{"timestamp": null, "level": null, "name": "app.main", "message": "WebSocket connected successfully"}
+{"timestamp": null, "level": null, "name": "app.main", "message": "All services initialized successfully"}
+{"timestamp": null, "level": null, "name": "app.services.websocket_manager", "message": "WebSocket connected successfully"}
+{"timestamp": null, "level": null, "name": "app.main", "message": "Shutting down services..."}
+{"timestamp": null, "level": null, "name": "app.services.trading_strategy", "message": "Strategy stopped"}
+{"timestamp": null, "level": null, "name": "app.main", "message": "Shutdown complete"}
+{"timestamp": null, "level": null, "name": "root", "message": "Logging setup complete. Log level: INFO"}
+{"timestamp": null, "level": null, "name": "app.main", "message": "Initializing services..."}
+{"timestamp": null, "level": null, "name": "app.main", "message": "Kite connected successfully. User: Rahul Dilip Mashere"}
+{"timestamp": null, "level": null, "name": "app.main", "message": "WebSocket connected successfully"}
+{"timestamp": null, "level": null, "name": "app.main", "message": "All services initialized successfully"}
+{"timestamp": null, "level": null, "name": "app.services.websocket_manager", "message": "WebSocket connected successfully"}
+{"timestamp": null, "level": null, "name": "app.main", "message": "Shutting down services..."}
+{"timestamp": null, "level": null, "name": "app.services.trading_strategy", "message": "Strategy stopped"}
+{"timestamp": null, "level": null, "name": "app.main", "message": "Shutdown complete"}
+{"timestamp": null, "level": null, "name": "root", "message": "Logging setup complete. Log level: INFO"}
+{"timestamp": null, "level": null, "name": "app.main", "message": "Initializing services..."}
+{"timestamp": null, "level": null, "name": "app.main", "message": "Kite connected successfully. User: Rahul Dilip Mashere"}
+{"timestamp": null, "level": null, "name": "app.main", "message": "WebSocket connected successfully"}
+{"timestamp": null, "level": null, "name": "app.main", "message": "All services initialized successfully"}
+{"timestamp": null, "level": null, "name": "app.services.websocket_manager", "message": "WebSocket connected successfully"}
+{"timestamp": null, "level": null, "name": "app.main", "message": "Shutting down services..."}
+{"timestamp": null, "level": null, "name": "app.services.trading_strategy", "message": "Strategy stopped"}
+{"timestamp": null, "level": null, "name": "app.main", "message": "Shutdown complete"}
+{"timestamp": null, "level": null, "name": "root", "message": "Logging setup complete. Log level: INFO"}
+{"timestamp": null, "level": null, "name": "app.main", "message": "Initializing services..."}
+{"timestamp": null, "level": null, "name": "app.main", "message": "Kite connected successfully. User: Rahul Dilip Mashere"}
+{"timestamp": null, "level": null, "name": "app.main", "message": "WebSocket connected successfully"}
+{"timestamp": null, "level": null, "name": "app.main", "message": "All services initialized successfully"}
+{"timestamp": null, "level": null, "name": "app.services.websocket_manager", "message": "WebSocket connected successfully"}
+{"timestamp": null, "level": null, "name": "app.services.instrument_lookup", "message": "Refreshing instruments for NFO"}
+{"timestamp": null, "level": null, "name": "app.services.instrument_lookup", "message": "Cached 30227 instruments for NFO"}
+{"timestamp": null, "level": null, "name": "app.services.instrument_lookup", "message": "Refreshing instruments for NFO"}
+{"timestamp": null, "level": null, "name": "app.services.instrument_lookup", "message": "Cached 30227 instruments for NFO"}
+{"timestamp": null, "level": null, "name": "app.services.instrument_lookup", "message": "Refreshing instruments for NFO"}
+{"timestamp": null, "level": null, "name": "app.services.instrument_lookup", "message": "Cached 30227 instruments for NFO"}
+{"timestamp": null, "level": null, "name": "app.services.instrument_lookup", "message": "Refreshing instruments for NFO"}
+{"timestamp": null, "level": null, "name": "app.services.instrument_lookup", "message": "Cached 30227 instruments for NFO"}
+{"timestamp": null, "level": null, "name": "app.services.backtesting_service", "message": "Starting backtest for NIFTY2560525000CE - NIFTY2560525000PE"}
+{"timestamp": null, "level": null, "name": "app.services.backtesting_service", "message": "Fetched 8249 candles for NIFTY2560525000CE"}
+{"timestamp": null, "level": null, "name": "app.services.backtesting_service", "message": "Fetched 7816 candles for NIFTY2560525000PE"}
+{"timestamp": null, "level": null, "name": "app.services.backtesting_service", "message": "Prepared 7598 spread data points"}
+{"timestamp": null, "level": null, "name": "app.services.backtesting_service", "message": "Simulated 330 trades"}
+{"timestamp": null, "level": null, "name": "app.services.backtesting_service", "message": "Backtest results saved to logs/backtest_20250603_173058.json"}
+{"timestamp": null, "level": null, "name": "app.services.instrument_lookup", "message": "Refreshing instruments for NFO"}
+{"timestamp": null, "level": null, "name": "app.services.instrument_lookup", "message": "Cached 30227 instruments for NFO"}
+{"timestamp": null, "level": null, "name": "app.services.backtesting_service", "message": "Starting backtest for NIFTY2560525000CE - NIFTY2560525000PE"}
+{"timestamp": null, "level": null, "name": "app.services.backtesting_service", "message": "Fetched 8249 candles for NIFTY2560525000CE"}
+{"timestamp": null, "level": null, "name": "app.services.backtesting_service", "message": "Fetched 7816 candles for NIFTY2560525000PE"}
+{"timestamp": null, "level": null, "name": "app.services.backtesting_service", "message": "Prepared 7598 spread data points"}
+{"timestamp": null, "level": null, "name": "app.services.backtesting_service", "message": "Simulated 330 trades"}
+{"timestamp": null, "level": null, "name": "app.services.backtesting_service", "message": "Backtest results saved to logs/backtest_20250603_173217.json"}
+{"timestamp": null, "level": null, "name": "app.services.instrument_lookup", "message": "Refreshing instruments for NFO"}
+{"timestamp": null, "level": null, "name": "app.services.instrument_lookup", "message": "Cached 30227 instruments for NFO"}
+{"timestamp": null, "level": null, "name": "app.services.backtesting_service", "message": "Starting backtest for NIFTY25JUNFUT - BANKNIFTY25JUNFUT"}
+{"timestamp": null, "level": null, "name": "app.services.backtesting_service", "message": "Fetched 8250 candles for NIFTY25JUNFUT"}
+{"timestamp": null, "level": null, "name": "app.services.backtesting_service", "message": "Fetched 8250 candles for BANKNIFTY25JUNFUT"}
+{"timestamp": null, "level": null, "name": "app.services.backtesting_service", "message": "Prepared 8231 spread data points"}
+{"timestamp": null, "level": null, "name": "app.services.backtesting_service", "message": "Simulated 342 trades"}
+{"timestamp": null, "level": null, "name": "app.services.backtesting_service", "message": "Backtest results saved to logs/backtest_20250603_173717.json"}
+{"timestamp": null, "level": null, "name": "root", "message": "Logging setup complete. Log level: INFO"}
+{"timestamp": null, "level": null, "name": "app.main", "message": "Initializing services..."}
+{"timestamp": null, "level": null, "name": "app.main", "message": "Kite connected successfully. User: Rahul Dilip Mashere"}
+{"timestamp": null, "level": null, "name": "app.main", "message": "WebSocket connected successfully"}
+{"timestamp": null, "level": null, "name": "app.main", "message": "All services initialized successfully"}
+{"timestamp": null, "level": null, "name": "app.services.websocket_manager", "message": "WebSocket connected successfully"}

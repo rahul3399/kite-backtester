@@ -1,39 +1,92 @@
-# docker-compose.yml
 version: '3.8'
 
 services:
   app:
-    build: .
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: kite-trading-app
     ports:
       - "8000:8000"
     environment:
       - DATABASE_URL=postgresql://postgres:password@db:5432/kite_trading
       - REDIS_URL=redis://redis:6379
+    env_file:
+      - .env
     depends_on:
       - db
       - redis
     volumes:
-      - ./app:/app
+      - ./app:/app/app
+      - ./logs:/app/logs
+      - ./data:/app/data
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    networks:
+      - kite-network
 
   db:
     image: postgres:16
+    container_name: kite-postgres
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=password
       - POSTGRES_DB=kite_trading
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init_db.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
       - "5432:5432"
+    networks:
+      - kite-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   redis:
     image: redis:7-alpine
+    container_name: kite-redis
     ports:
       - "6379:6379"
     volumes:
       - redis_data:/data
+    networks:
+      - kite-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Optional: Adminer for database management
+  adminer:
+    image: adminer
+    container_name: kite-adminer
+    ports:
+      - "8080:8080"
+    networks:
+      - kite-network
+    depends_on:
+      - db
+
+  # Optional: Redis Commander for Redis management
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: kite-redis-commander
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+    ports:
+      - "8081:8081"
+    networks:
+      - kite-network
+    depends_on:
+      - redis
 
 volumes:
   postgres_data:
   redis_data:
+
+networks:
+  kite-network:
+    driver: bridge

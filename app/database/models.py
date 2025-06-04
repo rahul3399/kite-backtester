@@ -150,7 +150,7 @@ class Order(Base):
     
     # Metadata
     tag = Column(String(50))
-    metadata = Column(JSON)
+    meta_info = Column(JSON)
     
     # Timestamps
     placed_at = Column(DateTime, nullable=False, default=func.now())
@@ -340,7 +340,7 @@ class Alert(Base):
     is_resolved = Column(Boolean, default=False)
     
     # Metadata
-    metadata = Column(JSON)
+    meta_info = Column(JSON)
     
     # Timestamps
     created_at = Column(DateTime, server_default=func.now())
@@ -377,7 +377,7 @@ class BacktestTrade(Base):
     slippage = Column(Float, default=0.0)
     
     # Metadata
-    metadata = Column(JSON)
+    meta_info = Column(JSON)
     
     # Relationships
     backtest = relationship("Backtest", back_populates="backtest_trades")
@@ -407,7 +407,7 @@ class AuditLog(Base):
     new_values = Column(JSON)
     
     # Metadata
-    metadata = Column(JSON)
+    meta_info = Column(JSON)
     
     # Timestamp
     created_at = Column(DateTime, server_default=func.now(), index=True)

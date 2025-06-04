@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 import logging
 from collections import defaultdict
 import numpy as np
+from typing import Callable
 
 from ..strategies.base_strategy import Signal, OrderSide
 from ..core.position_manager import PositionManager

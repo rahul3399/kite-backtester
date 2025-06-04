@@ -1,5 +1,5 @@
 # app/api/v1/reports.py
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Depends
 from fastapi.responses import StreamingResponse, FileResponse
 from typing import Dict, List, Optional, Any
 from datetime import datetime, timedelta
@@ -7,17 +7,32 @@ import pandas as pd
 import json
 import io
 import logging
+from sqlalchemy.orm import Session
 
 from ...api.models.requests import ReportRequest
 from ...api.models.responses import EquityCurveResponse, EquityCurvePoint
-from ..backtest import backtest_results
-from ..paper_trade import active_strategies
+from ...dependencies import get_db
+from ...database import crud
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
+# In-memory storage for backtest results (should be replaced with database)
+_backtest_results: Dict[str, Any] = {}
+_active_strategies: Dict[str, Dict[str, Any]] = {}
+
+def set_backtest_results(results: Dict[str, Any]):
+    """Set backtest results (called from backtest module)"""
+    global _backtest_results
+    _backtest_results = results
+
+def set_active_strategies(strategies: Dict[str, Dict[str, Any]]):
+    """Set active strategies (called from paper_trade module)"""
+    global _active_strategies
+    _active_strategies = strategies
+
 @router.get("/backtest/{backtest_id}/summary")
-async def get_backtest_summary(backtest_id: str):
+async def get_backtest_summary(backtest_id: str, db: Session = Depends(get_db)):
     """
     Get comprehensive backtest report
     
@@ -28,13 +43,19 @@ async def get_backtest_summary(backtest_id: str):
     - Trade statistics
     """
     
-    if backtest_id not in backtest_results:
+    # Try to get from database first
+    backtest = crud.get_backtest(db, backtest_id)
+    if backtest and backtest.status == "completed":
+        return _generate_backtest_summary_from_db(backtest)
+    
+    # Fallback to in-memory results
+    if backtest_id not in _backtest_results:
         raise HTTPException(
             status_code=404,
             detail="Backtest not found"
         )
     
-    result = backtest_results[backtest_id]
+    result = _backtest_results[backtest_id]
     if result["status"] != "completed":
         raise HTTPException(
             status_code=400,
@@ -46,45 +67,74 @@ async def get_backtest_summary(backtest_id: str):
     # Generate comprehensive report
     report = {
         "summary": {
-            "strategy": backtest_result.strategy_name,
+            "strategy": backtest_result.strategy_name if hasattr(backtest_result, 'strategy_name') else 'Unknown',
             "period": {
-                "start": backtest_result.start_date.isoformat(),
-                "end": backtest_result.end_date.isoformat(),
-                "days": (backtest_result.end_date - backtest_result.start_date).days
+                "start": backtest_result.start_date.isoformat() if hasattr(backtest_result, 'start_date') else None,
+                "end": backtest_result.end_date.isoformat() if hasattr(backtest_result, 'end_date') else None,
+                "days": (backtest_result.end_date - backtest_result.start_date).days if hasattr(backtest_result, 'start_date') and hasattr(backtest_result, 'end_date') else 0
             },
-            "symbols": backtest_result.symbols,
-            "initial_capital": backtest_result.initial_capital,
-            "final_capital": backtest_result.final_capital,
+            "symbols": backtest_result.symbols if hasattr(backtest_result, 'symbols') else [],
+            "initial_capital": backtest_result.initial_capital if hasattr(backtest_result, 'initial_capital') else 0,
+            "final_capital": backtest_result.final_capital if hasattr(backtest_result, 'final_capital') else 0,
             "total_return": ((backtest_result.final_capital - backtest_result.initial_capital) / 
-                           backtest_result.initial_capital * 100),
-            "total_trades": len(backtest_result.trades),
-            "avg_trades_per_day": len(backtest_result.trades) / max(1, (backtest_result.end_date - backtest_result.start_date).days)
+                           backtest_result.initial_capital * 100) if hasattr(backtest_result, 'initial_capital') and hasattr(backtest_result, 'final_capital') and backtest_result.initial_capital > 0 else 0,
+            "total_trades": len(backtest_result.trades) if hasattr(backtest_result, 'trades') else 0,
+            "avg_trades_per_day": len(backtest_result.trades) / max(1, (backtest_result.end_date - backtest_result.start_date).days) if hasattr(backtest_result, 'trades') and hasattr(backtest_result, 'start_date') and hasattr(backtest_result, 'end_date') else 0
         },
-        "metrics": backtest_result.metrics,
-        "monthly_returns": _calculate_monthly_returns(backtest_result.equity_curve),
-        "yearly_returns": _calculate_yearly_returns(backtest_result.equity_curve),
-        "drawdown_analysis": _analyze_drawdowns(backtest_result.equity_curve),
-        "trade_analysis": _analyze_trades(backtest_result.trades),
-        "symbol_performance": _analyze_symbol_performance(backtest_result.trades),
-        "time_analysis": _analyze_time_patterns(backtest_result.trades)
+        "metrics": backtest_result.metrics if hasattr(backtest_result, 'metrics') else {},
+        "monthly_returns": _calculate_monthly_returns(backtest_result.equity_curve) if hasattr(backtest_result, 'equity_curve') else {},
+        "yearly_returns": _calculate_yearly_returns(backtest_result.equity_curve) if hasattr(backtest_result, 'equity_curve') else {},
+        "drawdown_analysis": _analyze_drawdowns(backtest_result.equity_curve) if hasattr(backtest_result, 'equity_curve') else {},
+        "trade_analysis": _analyze_trades(backtest_result.trades) if hasattr(backtest_result, 'trades') else {},
+        "symbol_performance": _analyze_symbol_performance(backtest_result.trades) if hasattr(backtest_result, 'trades') else {},
+        "time_analysis": _analyze_time_patterns(backtest_result.trades) if hasattr(backtest_result, 'trades') else {}
     }
     
     return report
 
+def _generate_backtest_summary_from_db(backtest) -> Dict[str, Any]:
+    """Generate summary from database backtest record"""
+    
+    return {
+        "summary": {
+            "strategy": backtest.strategy.name if backtest.strategy else 'Unknown',
+            "period": {
+                "start": backtest.start_date.isoformat(),
+                "end": backtest.end_date.isoformat(),
+                "days": (backtest.end_date - backtest.start_date).days
+            },
+            "symbols": backtest.symbols,
+            "initial_capital": backtest.initial_capital,
+            "final_capital": backtest.final_capital or 0,
+            "total_return": backtest.total_return or 0,
+            "total_trades": backtest.total_trades or 0
+        },
+        "metrics": backtest.metrics or {},
+        "execution_time": backtest.execution_time,
+        "bars_processed": backtest.bars_processed
+    }
+
 @router.get("/backtest/{backtest_id}/export")
 async def export_backtest_results(
     backtest_id: str,
-    format: str = Query("csv", pattern="^(csv|json|excel)$", description="Export format")
+    format: str = Query("csv", pattern="^(csv|json|excel)$", description="Export format"),
+    db: Session = Depends(get_db)
 ):
     """Export backtest results in various formats"""
     
-    if backtest_id not in backtest_results:
+    # Try database first
+    backtest = crud.get_backtest(db, backtest_id)
+    if backtest and backtest.status == "completed":
+        return _export_backtest_from_db(backtest, format)
+    
+    # Fallback to in-memory
+    if backtest_id not in _backtest_results:
         raise HTTPException(
             status_code=404,
             detail="Backtest not found"
         )
     
-    result = backtest_results[backtest_id]
+    result = _backtest_results[backtest_id]
     if result["status"] != "completed":
         raise HTTPException(
             status_code=400,
@@ -95,11 +145,12 @@ async def export_backtest_results(
     
     if format == "csv":
         # Export trades as CSV
-        df = pd.DataFrame(backtest_result.trades)
+        trades_data = backtest_result.trades if hasattr(backtest_result, 'trades') else []
+        df = pd.DataFrame(trades_data)
         
         # Add additional columns
         if not df.empty:
-            df['strategy'] = backtest_result.strategy_name
+            df['strategy'] = backtest_result.strategy_name if hasattr(backtest_result, 'strategy_name') else 'Unknown'
             df['backtest_id'] = backtest_id
             
         stream = io.StringIO()
@@ -117,18 +168,18 @@ async def export_backtest_results(
         export_data = {
             "backtest_id": backtest_id,
             "summary": {
-                "strategy": backtest_result.strategy_name,
-                "start_date": backtest_result.start_date.isoformat(),
-                "end_date": backtest_result.end_date.isoformat(),
-                "initial_capital": backtest_result.initial_capital,
-                "final_capital": backtest_result.final_capital,
+                "strategy": backtest_result.strategy_name if hasattr(backtest_result, 'strategy_name') else 'Unknown',
+                "start_date": backtest_result.start_date.isoformat() if hasattr(backtest_result, 'start_date') else None,
+                "end_date": backtest_result.end_date.isoformat() if hasattr(backtest_result, 'end_date') else None,
+                "initial_capital": backtest_result.initial_capital if hasattr(backtest_result, 'initial_capital') else 0,
+                "final_capital": backtest_result.final_capital if hasattr(backtest_result, 'final_capital') else 0,
                 "total_return": ((backtest_result.final_capital - backtest_result.initial_capital) / 
-                               backtest_result.initial_capital * 100)
+                               backtest_result.initial_capital * 100) if hasattr(backtest_result, 'initial_capital') and hasattr(backtest_result, 'final_capital') and backtest_result.initial_capital > 0 else 0
             },
-            "metrics": backtest_result.metrics,
-            "trades": backtest_result.trades,
-            "equity_curve": backtest_result.equity_curve.to_dict() if not backtest_result.equity_curve.empty else {},
-            "monthly_returns": _calculate_monthly_returns(backtest_result.equity_curve)
+            "metrics": backtest_result.metrics if hasattr(backtest_result, 'metrics') else {},
+            "trades": backtest_result.trades if hasattr(backtest_result, 'trades') else [],
+            "equity_curve": backtest_result.equity_curve.to_dict() if hasattr(backtest_result, 'equity_curve') and not backtest_result.equity_curve.empty else {},
+            "monthly_returns": _calculate_monthly_returns(backtest_result.equity_curve) if hasattr(backtest_result, 'equity_curve') else {}
         }
         
         return StreamingResponse(
@@ -141,33 +192,38 @@ async def export_backtest_results(
         # Export as Excel with multiple sheets
         output = io.BytesIO()
         
-        with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
-            # Summary sheet
-            summary_df = pd.DataFrame([{
-                'Strategy': backtest_result.strategy_name,
-                'Start Date': backtest_result.start_date,
-                'End Date': backtest_result.end_date,
-                'Initial Capital': backtest_result.initial_capital,
-                'Final Capital': backtest_result.final_capital,
-                'Total Return %': ((backtest_result.final_capital - backtest_result.initial_capital) / 
-                                 backtest_result.initial_capital * 100),
-                'Total Trades': len(backtest_result.trades)
-            }])
-            summary_df.to_excel(writer, sheet_name='Summary', index=False)
-            
-            # Metrics sheet
-            metrics_df = pd.DataFrame([backtest_result.metrics])
-            metrics_df.to_excel(writer, sheet_name='Metrics', index=False)
-            
-            # Trades sheet
-            trades_df = pd.DataFrame(backtest_result.trades)
-            if not trades_df.empty:
-                trades_df.to_excel(writer, sheet_name='Trades', index=False)
-            
-            # Equity curve sheet
-            if not backtest_result.equity_curve.empty:
-                equity_df = backtest_result.equity_curve.reset_index()
-                equity_df.to_excel(writer, sheet_name='Equity Curve', index=False)
+        try:
+            with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+                # Summary sheet
+                summary_df = pd.DataFrame([{
+                    'Strategy': backtest_result.strategy_name if hasattr(backtest_result, 'strategy_name') else 'Unknown',
+                    'Start Date': backtest_result.start_date if hasattr(backtest_result, 'start_date') else None,
+                    'End Date': backtest_result.end_date if hasattr(backtest_result, 'end_date') else None,
+                    'Initial Capital': backtest_result.initial_capital if hasattr(backtest_result, 'initial_capital') else 0,
+                    'Final Capital': backtest_result.final_capital if hasattr(backtest_result, 'final_capital') else 0,
+                    'Total Return %': ((backtest_result.final_capital - backtest_result.initial_capital) / 
+                                     backtest_result.initial_capital * 100) if hasattr(backtest_result, 'initial_capital') and hasattr(backtest_result, 'final_capital') and backtest_result.initial_capital > 0 else 0,
+                    'Total Trades': len(backtest_result.trades) if hasattr(backtest_result, 'trades') else 0
+                }])
+                summary_df.to_excel(writer, sheet_name='Summary', index=False)
+                
+                # Metrics sheet
+                if hasattr(backtest_result, 'metrics') and backtest_result.metrics:
+                    metrics_df = pd.DataFrame([backtest_result.metrics])
+                    metrics_df.to_excel(writer, sheet_name='Metrics', index=False)
+                
+                # Trades sheet
+                if hasattr(backtest_result, 'trades') and backtest_result.trades:
+                    trades_df = pd.DataFrame(backtest_result.trades)
+                    trades_df.to_excel(writer, sheet_name='Trades', index=False)
+                
+                # Equity curve sheet
+                if hasattr(backtest_result, 'equity_curve') and not backtest_result.equity_curve.empty:
+                    equity_df = backtest_result.equity_curve.reset_index()
+                    equity_df.to_excel(writer, sheet_name='Equity Curve', index=False)
+        except Exception as e:
+            logger.error(f"Error creating Excel file: {e}")
+            raise HTTPException(status_code=500, detail="Error generating Excel report")
         
         output.seek(0)
         
@@ -177,6 +233,33 @@ async def export_backtest_results(
             headers={"Content-Disposition": f"attachment; filename=backtest_{backtest_id}.xlsx"}
         )
 
+def _export_backtest_from_db(backtest, format: str):
+    """Export backtest from database record"""
+    
+    if format == "json":
+        export_data = {
+            "backtest_id": backtest.backtest_id,
+            "summary": {
+                "strategy": backtest.strategy.name if backtest.strategy else 'Unknown',
+                "start_date": backtest.start_date.isoformat(),
+                "end_date": backtest.end_date.isoformat(),
+                "initial_capital": backtest.initial_capital,
+                "final_capital": backtest.final_capital or 0,
+                "total_return": backtest.total_return or 0
+            },
+            "metrics": backtest.metrics or {},
+            "parameters": backtest.parameters or {}
+        }
+        
+        return StreamingResponse(
+            io.BytesIO(json.dumps(export_data, indent=2, default=str).encode()),
+            media_type="application/json",
+            headers={"Content-Disposition": f"attachment; filename=backtest_{backtest.backtest_id}.json"}
+        )
+    
+    # For CSV and Excel, would need to fetch related trade data
+    raise HTTPException(status_code=501, detail=f"Export format {format} not implemented for database records")
+
 @router.get("/paper-trading/performance")
 async def get_paper_trading_performance_report(
     start_date: Optional[datetime] = None,
@@ -185,72 +268,91 @@ async def get_paper_trading_performance_report(
 ):
     """Get paper trading performance report"""
     
-    from ...main import paper_engine
-    
-    # Get all trades
-    trades = paper_engine.virtual_broker.trades
-    
-    # Apply filters
-    if strategy_id:
-        trades = [t for t in trades if t.get("strategy_id") == strategy_id]
-    
-    if start_date:
-        trades = [t for t in trades if t["timestamp"] >= start_date]
-    
-    if end_date:
-        trades = [t for t in trades if t["timestamp"] <= end_date]
-    
-    # Get current positions
-    positions = paper_engine.virtual_broker.get_positions()
-    
-    # Calculate metrics
-    from ...reporting.metrics_calculator import MetricsCalculator
-    calculator = MetricsCalculator()
-    
-    # Create equity curve from trades
-    equity_data = []
-    current_value = paper_engine.virtual_broker.initial_capital
-    
-    for trade in sorted(trades, key=lambda x: x["timestamp"]):
-        if trade.get("pnl"):
-            current_value += trade["pnl"] - trade.get("commission", 0)
-            equity_data.append({
-                "timestamp": trade["timestamp"],
-                "portfolio_value": current_value,
-                "capital": current_value - sum(p.get("market_value", 0) for p in positions.values())
-            })
-    
-    equity_df = pd.DataFrame(equity_data) if equity_data else pd.DataFrame()
-    if not equity_df.empty:
-        equity_df.set_index("timestamp", inplace=True)
-    
-    metrics = calculator.calculate_metrics(
-        trades, equity_df, paper_engine.virtual_broker.initial_capital
-    )
-    
-    # Build report
-    report = {
-        "period": {
-            "start": start_date.isoformat() if start_date else None,
-            "end": end_date.isoformat() if end_date else None
-        },
-        "summary": paper_engine.virtual_broker.get_performance_summary(),
-        "metrics": metrics,
-        "positions": [
-            {
-                "symbol": symbol,
-                "quantity": pos["quantity"],
-                "avg_price": pos["avg_price"],
-                "current_value": pos["quantity"] * paper_engine.virtual_broker.market_prices.get(symbol, pos["avg_price"]),
-                "unrealized_pnl": pos.get("unrealized_pnl", 0)
-            }
-            for symbol, pos in positions.items()
-        ],
-        "active_strategies": len([s for s in active_strategies.values() if s["status"] == "running"]),
-        "trade_analysis": _analyze_trades(trades) if trades else {}
-    }
-    
-    return report
+    # This would need to be implemented with proper paper trading engine integration
+    # For now, return a placeholder
+    try:
+        # Get paper trading data from main application
+        from ...main import paper_engine
+        
+        # Get all trades
+        trades = paper_engine.virtual_broker.trades if paper_engine else []
+        
+        # Apply filters
+        if strategy_id:
+            trades = [t for t in trades if t.get("strategy_id") == strategy_id]
+        
+        if start_date:
+            trades = [t for t in trades if t["timestamp"] >= start_date]
+        
+        if end_date:
+            trades = [t for t in trades if t["timestamp"] <= end_date]
+        
+        # Get current positions
+        positions = paper_engine.virtual_broker.get_positions() if paper_engine else {}
+        
+        # Calculate metrics
+        from ...reporting.metrics_calculator import MetricsCalculator
+        calculator = MetricsCalculator()
+        
+        # Create equity curve from trades
+        equity_data = []
+        current_value = paper_engine.virtual_broker.initial_capital if paper_engine else 1000000
+        
+        for trade in sorted(trades, key=lambda x: x["timestamp"]):
+            if trade.get("pnl"):
+                current_value += trade["pnl"] - trade.get("commission", 0)
+                equity_data.append({
+                    "timestamp": trade["timestamp"],
+                    "portfolio_value": current_value,
+                    "capital": current_value - sum(p.get("market_value", 0) for p in positions.values())
+                })
+        
+        equity_df = pd.DataFrame(equity_data) if equity_data else pd.DataFrame()
+        if not equity_df.empty:
+            equity_df.set_index("timestamp", inplace=True)
+        
+        metrics = calculator.calculate_metrics(
+            trades, equity_df, paper_engine.virtual_broker.initial_capital if paper_engine else 1000000
+        )
+        
+        # Build report
+        report = {
+            "period": {
+                "start": start_date.isoformat() if start_date else None,
+                "end": end_date.isoformat() if end_date else None
+            },
+            "summary": paper_engine.virtual_broker.get_performance_summary() if paper_engine else {},
+            "metrics": metrics,
+            "positions": [
+                {
+                    "symbol": symbol,
+                    "quantity": pos["quantity"],
+                    "avg_price": pos["avg_price"],
+                    "current_value": pos["quantity"] * (paper_engine.virtual_broker.market_prices.get(symbol, pos["avg_price"]) if paper_engine else pos["avg_price"]),
+                    "unrealized_pnl": pos.get("unrealized_pnl", 0)
+                }
+                for symbol, pos in positions.items()
+            ],
+            "active_strategies": len(_active_strategies),
+            "trade_analysis": _analyze_trades(trades) if trades else {}
+        }
+        
+        return report
+        
+    except ImportError:
+        # Fallback if paper_engine not available
+        return {
+            "error": "Paper trading engine not available",
+            "period": {
+                "start": start_date.isoformat() if start_date else None,
+                "end": end_date.isoformat() if end_date else None
+            },
+            "summary": {},
+            "metrics": {},
+            "positions": [],
+            "active_strategies": 0,
+            "trade_analysis": {}
+        }
 
 @router.get("/equity-curve")
 async def get_equity_curve(
@@ -261,43 +363,47 @@ async def get_equity_curve(
     """Get equity curve data"""
     
     if source == "backtest":
-        if not id or id not in backtest_results:
+        if not id or id not in _backtest_results:
             raise HTTPException(
                 status_code=404,
                 detail="Backtest not found"
             )
         
-        result = backtest_results[id]
+        result = _backtest_results[id]
         if result["status"] != "completed":
             raise HTTPException(
                 status_code=400,
                 detail="Backtest not completed"
             )
         
-        equity_curve = result["result"].equity_curve
+        equity_curve = result["result"].equity_curve if hasattr(result["result"], 'equity_curve') else pd.DataFrame()
         
     else:  # paper-trading
-        from ...main import paper_engine
-        
-        # Build equity curve from trades
-        trades = paper_engine.virtual_broker.trades
-        if id:  # Filter by strategy
-            trades = [t for t in trades if t.get("strategy_id") == id]
-        
-        equity_data = []
-        current_value = paper_engine.virtual_broker.initial_capital
-        
-        for trade in sorted(trades, key=lambda x: x["timestamp"]):
-            if trade.get("pnl"):
-                current_value += trade["pnl"] - trade.get("commission", 0)
-                equity_data.append({
-                    "timestamp": trade["timestamp"],
-                    "portfolio_value": current_value
-                })
-        
-        equity_curve = pd.DataFrame(equity_data)
-        if not equity_curve.empty:
-            equity_curve.set_index("timestamp", inplace=True)
+        try:
+            from ...main import paper_engine
+            
+            # Build equity curve from trades
+            trades = paper_engine.virtual_broker.trades if paper_engine else []
+            if id:  # Filter by strategy
+                trades = [t for t in trades if t.get("strategy_id") == id]
+            
+            equity_data = []
+            current_value = paper_engine.virtual_broker.initial_capital if paper_engine else 1000000
+            
+            for trade in sorted(trades, key=lambda x: x["timestamp"]):
+                if trade.get("pnl"):
+                    current_value += trade["pnl"] - trade.get("commission", 0)
+                    equity_data.append({
+                        "timestamp": trade["timestamp"],
+                        "portfolio_value": current_value
+                    })
+            
+            equity_curve = pd.DataFrame(equity_data)
+            if not equity_curve.empty:
+                equity_curve.set_index("timestamp", inplace=True)
+                
+        except ImportError:
+            equity_curve = pd.DataFrame()
     
     if equity_curve.empty:
         return EquityCurveResponse(
@@ -358,48 +464,63 @@ async def generate_custom_report(request: ReportRequest):
         )
     
     elif request.report_type == "trades":
-        from ...main import paper_engine
-        trades = paper_engine.virtual_broker.trades
-        
-        # Apply filters
-        if request.strategy_id:
-            trades = [t for t in trades if t.get("strategy_id") == request.strategy_id]
-        if request.symbols:
-            trades = [t for t in trades if t["symbol"] in request.symbols]
-        if request.start_date:
-            trades = [t for t in trades if t["timestamp"] >= request.start_date]
-        if request.end_date:
-            trades = [t for t in trades if t["timestamp"] <= request.end_date]
-        
-        return {
-            "trades": trades,
-            "total": len(trades),
-            "filters_applied": {
-                "strategy_id": request.strategy_id,
-                "symbols": request.symbols,
-                "date_range": {
-                    "start": request.start_date,
-                    "end": request.end_date
+        try:
+            from ...main import paper_engine
+            trades = paper_engine.virtual_broker.trades if paper_engine else []
+            
+            # Apply filters
+            if request.strategy_id:
+                trades = [t for t in trades if t.get("strategy_id") == request.strategy_id]
+            if request.symbols:
+                trades = [t for t in trades if t["symbol"] in request.symbols]
+            if request.start_date:
+                trades = [t for t in trades if t["timestamp"] >= request.start_date]
+            if request.end_date:
+                trades = [t for t in trades if t["timestamp"] <= request.end_date]
+            
+            return {
+                "trades": trades,
+                "total": len(trades),
+                "filters_applied": {
+                    "strategy_id": request.strategy_id,
+                    "symbols": request.symbols,
+                    "date_range": {
+                        "start": request.start_date,
+                        "end": request.end_date
+                    }
                 }
             }
-        }
+        except ImportError:
+            return {
+                "trades": [],
+                "total": 0,
+                "error": "Paper trading engine not available"
+            }
     
     elif request.report_type == "positions":
-        from ...main import paper_engine
-        positions = paper_engine.virtual_broker.get_positions()
-        
-        # Filter by symbols if specified
-        if request.symbols:
-            positions = {s: p for s, p in positions.items() if s in request.symbols}
-        
-        return {
-            "positions": positions,
-            "total": len(positions),
-            "total_value": sum(
-                p["quantity"] * paper_engine.virtual_broker.market_prices.get(s, p["avg_price"])
-                for s, p in positions.items()
-            )
-        }
+        try:
+            from ...main import paper_engine
+            positions = paper_engine.virtual_broker.get_positions() if paper_engine else {}
+            
+            # Filter by symbols if specified
+            if request.symbols:
+                positions = {s: p for s, p in positions.items() if s in request.symbols}
+            
+            return {
+                "positions": positions,
+                "total": len(positions),
+                "total_value": sum(
+                    p["quantity"] * (paper_engine.virtual_broker.market_prices.get(s, p["avg_price"]) if paper_engine else p["avg_price"])
+                    for s, p in positions.items()
+                )
+            }
+        except ImportError:
+            return {
+                "positions": {},
+                "total": 0,
+                "total_value": 0,
+                "error": "Paper trading engine not available"
+            }
     
     else:
         raise HTTPException(
@@ -411,7 +532,7 @@ async def generate_custom_report(request: ReportRequest):
 
 def _calculate_monthly_returns(equity_curve: pd.DataFrame) -> Dict[str, float]:
     """Calculate monthly returns from equity curve"""
-    if equity_curve.empty:
+    if equity_curve.empty or 'portfolio_value' not in equity_curve.columns:
         return {}
     
     monthly = equity_curve['portfolio_value'].resample('M').last()
@@ -424,7 +545,7 @@ def _calculate_monthly_returns(equity_curve: pd.DataFrame) -> Dict[str, float]:
 
 def _calculate_yearly_returns(equity_curve: pd.DataFrame) -> Dict[str, float]:
     """Calculate yearly returns from equity curve"""
-    if equity_curve.empty:
+    if equity_curve.empty or 'portfolio_value' not in equity_curve.columns:
         return {}
     
     yearly = equity_curve['portfolio_value'].resample('Y').last()
@@ -437,7 +558,7 @@ def _calculate_yearly_returns(equity_curve: pd.DataFrame) -> Dict[str, float]:
 
 def _analyze_drawdowns(equity_curve: pd.DataFrame) -> Dict[str, Any]:
     """Analyze drawdowns from equity curve"""
-    if equity_curve.empty:
+    if equity_curve.empty or 'portfolio_value' not in equity_curve.columns:
         return {}
     
     values = equity_curve['portfolio_value']

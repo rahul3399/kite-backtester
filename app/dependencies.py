@@ -5,7 +5,7 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 
 from .database.session import SessionLocal
-from .config import get_settings
+from .config import get_settings, Settings
 from .core.kite_client import KiteClient
 
 # Security

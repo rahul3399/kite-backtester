@@ -1,10 +1,10 @@
 # app/database/session.py
-from sqlalchemy import create_engine, event
+from sqlalchemy import create_engine, event, inspect
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.pool import StaticPool
 import logging
-from typing import Generator
+from typing import Generator, List, Dict, Any, Optional
 
 from ..config import get_settings
 

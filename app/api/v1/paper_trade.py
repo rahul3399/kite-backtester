@@ -3,17 +3,21 @@ from fastapi import APIRouter, HTTPException, Depends, Query
 from typing import Dict, List, Optional, Any
 from datetime import datetime
 import logging
+import uuid
+import pandas as pd
 
 from ...api.models.requests import (
     StartStrategyRequest, StopStrategyRequest, OrderRequest, ModifyOrderRequest
 )
 from ...api.models.responses import (
     StrategyResponse, PositionResponse, OrderResponse, 
-    PerformanceResponse, StatusEnum
+    PerformanceResponse, StatusEnum, TradeResponse,  # Added TradeResponse
+    PerformanceMetrics  # Added PerformanceMetrics
 )
 from ...strategies.registry import strategy_registry
 from ...strategies.base_strategy import StrategyConfig
 from ...dependencies import get_db
+from ...config import get_settings  # Added missing import
 from sqlalchemy.orm import Session
 
 router = APIRouter()
@@ -44,7 +48,14 @@ async def start_strategy(
             detail=f"Strategy '{request.strategy_name}' not found"
         )
     
-    from ...main import paper_engine
+    # Get paper engine - fix circular import issue
+    try:
+        from ...main import paper_engine
+    except ImportError:
+        raise HTTPException(
+            status_code=503,
+            detail="Paper trading engine not available"
+        )
     
     # Check if paper engine is running
     if not paper_engine.is_running:
@@ -105,7 +116,13 @@ async def stop_strategy(
             detail="Strategy not found"
         )
     
-    from ...main import paper_engine
+    try:
+        from ...main import paper_engine
+    except ImportError:
+        raise HTTPException(
+            status_code=503,
+            detail="Paper trading engine not available"
+        )
     
     # Get strategy info
     strategy_info = active_strategies[strategy_id]
@@ -177,7 +194,13 @@ async def get_positions(
 ):
     """Get current positions"""
     
-    from ...main import paper_engine
+    try:
+        from ...main import paper_engine
+    except ImportError:
+        raise HTTPException(
+            status_code=503,
+            detail="Paper trading engine not available"
+        )
     
     positions = paper_engine.virtual_broker.get_positions()
     position_list = []
@@ -216,7 +239,13 @@ async def get_performance(
 ):
     """Get performance metrics"""
     
-    from ...main import paper_engine
+    try:
+        from ...main import paper_engine
+    except ImportError:
+        raise HTTPException(
+            status_code=503,
+            detail="Paper trading engine not available"
+        )
     
     # Get performance summary
     summary = paper_engine.virtual_broker.get_performance_summary()
@@ -275,7 +304,13 @@ async def get_trades(
 ):
     """Get recent trades"""
     
-    from ...main import paper_engine
+    try:
+        from ...main import paper_engine
+    except ImportError:
+        raise HTTPException(
+            status_code=503,
+            detail="Paper trading engine not available"
+        )
     
     trades = paper_engine.virtual_broker.trades
     
@@ -316,7 +351,13 @@ async def get_trades(
 async def place_order(request: OrderRequest):
     """Place a manual order in paper trading"""
     
-    from ...main import paper_engine
+    try:
+        from ...main import paper_engine
+    except ImportError:
+        raise HTTPException(
+            status_code=503,
+            detail="Paper trading engine not available"
+        )
     
     # Validate order
     if request.order_type == "LIMIT" and request.price is None:
@@ -376,7 +417,13 @@ async def get_orders(
 ):
     """Get order history"""
     
-    from ...main import paper_engine
+    try:
+        from ...main import paper_engine
+    except ImportError:
+        raise HTTPException(
+            status_code=503,
+            detail="Paper trading engine not available"
+        )
     
     orders = paper_engine.virtual_broker.orders
     
@@ -418,7 +465,14 @@ async def get_orders(
 async def reset_paper_trading():
     """Reset paper trading account to initial state"""
     
-    from ...main import paper_engine
+    try:
+        from ...main import paper_engine
+        settings = get_settings()
+    except ImportError:
+        raise HTTPException(
+            status_code=503,
+            detail="Paper trading engine not available"
+        )
     
     # Stop all active strategies
     for strategy_id in list(active_strategies.keys()):
@@ -426,7 +480,6 @@ async def reset_paper_trading():
             await paper_engine.stop_strategy(strategy_id)
     
     # Reset virtual broker
-    settings = get_settings()
     paper_engine.virtual_broker.reset(settings.PAPER_TRADING_INITIAL_CAPITAL)
     
     # Clear active strategies

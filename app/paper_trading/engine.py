@@ -12,7 +12,7 @@ from ..strategies.base_strategy import BaseStrategy, Signal, OrderSide, OrderTyp
 from ..core.websocket_manager import WebSocketManager
 from ..core.kite_client import KiteClient
 from ..core.data_manager import DataManager
-from ..core.order_manager import OrderManager
+from ..core.order_manager import OrderManager, OrderStatus
 from ..core.position_manager import PositionManager
 from .virtual_broker import VirtualBroker
 from .live_feed import LiveDataFeed

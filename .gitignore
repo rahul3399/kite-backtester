@@ -1,1 +1,53 @@
-venv/*
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pdb
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Virtual Environment
+venv/
+env/
+ENV/
+.venv/
+.python-version
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+
+# Logs
+*.log
+
+# Test coverage
+htmlcov/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.pytest_cache/
+
+# mypy
+.mypy_cache/
+
+# PyInstaller
+*.spec
+
+# dotenv
+.env
+.env.*
+
+# SQLite
+*.sqlite3
+*.db
+
+# Docker
+*.pid
+docker-compose.overrid

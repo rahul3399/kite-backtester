@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, Depends
-from typing import Dict, List, Optional  # Add Optional here
+from typing import Dict, List, Optional
 
 from ..models.trading import StrategyStatus
 from ..services.trading_strategy import PairTradingStrategy

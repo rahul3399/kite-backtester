@@ -43,6 +43,7 @@ coverage.xml
 # dotenv
 .env
 .env.*
+!.env.example
 
 # SQLite
 *.sqlite3

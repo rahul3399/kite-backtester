@@ -166,7 +166,7 @@ async def get_spread_history(
     }
 
 
-router.get("/instruments/search")
+@router.get("/instruments/search")
 async def search_instruments(
     query: str,
     exchange: str = "NFO",

@@ -187,7 +187,9 @@ class BacktestingService:
                 
                 # Track max favorable/adverse moves
                 current_pnl_points = self._calculate_pnl_points(
-                    current_trade, row['spread'], row['spread']
+                    current_trade,
+                    current_trade.entry_spread,
+                    row['spread']
                 )
                 
                 if current_pnl_points > current_trade.max_favorable_move:
